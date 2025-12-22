@@ -1,1 +1,1 @@
-# alumini
+# alumni
