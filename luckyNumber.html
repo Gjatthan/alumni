@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Alumni Lucky Draw</title>
+
+<style>
+body {
+    margin: 0;
+    height: 100vh;
+    background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-family: "Segoe UI", sans-serif;
+}
+
+/* Confetti */
+.confetti-strip {
+    position: fixed;
+    width: 10px;
+    height: 26px;
+    border-radius: 2px;
+    pointer-events: none;
+    z-index: 9999;
+    opacity: 0.95;
+}
+
+/* Main container */
+.container {
+    background: linear-gradient(145deg, #ffffff, #f5f7fa);
+    padding: 45px;
+    border-radius: 20px;
+    border: 4px solid #d4af37;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+    text-align: center;
+    width: 480px;
+}
+
+h1 {
+    color: #203a43;
+    margin-bottom: 10px;
+}
+
+.subtitle {
+    color: #555;
+    margin-bottom: 30px;
+    font-size: 15px;
+}
+
+/* Reels */
+.reels {
+    display: flex;
+    gap: 18px;
+    justify-content: center;
+    margin-bottom: 30px;
+}
+
+.reel {
+    width: 90px;
+    height: 110px;
+    overflow: hidden;
+    border-radius: 12px;
+    background: linear-gradient(#1c2e3a, #0f2027);
+    border: 3px solid #d4af37;
+    box-shadow: inset 0 0 10px rgba(212,175,55,0.5);
+}
+
+.track {
+    transform: translateY(0);
+}
+
+.track div {
+    height: 110px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 48px;
+    font-weight: bold;
+    color: #d4af37;
+}
+
+/* Button */
+button {
+    padding: 14px 45px;
+    font-size: 18px;
+    border-radius: 30px;
+    border: none;
+    cursor: pointer;
+    background: linear-gradient(#d4af37, #b8962e);
+    color: #1c2e3a;
+    box-shadow: 0 6px 0 #9c7c1f;
+}
+
+button:active {
+    transform: translateY(4px);
+    box-shadow: 0 2px 0 #9c7c1f;
+}
+
+/* Dialog */
+.dialog {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.6);
+    display: none;
+    justify-content: center;
+    align-items: center;
+}
+
+.dialog-box {
+    background: white;
+    padding: 35px;
+    border-radius: 15px;
+    border: 3px solid #d4af37;
+    text-align: center;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+    <h1>Alumni Lucky Draw</h1>
+    <div class="subtitle">Golden Reunion Celebration</div>
+
+    <div class="reels">
+        <div class="reel"><div class="track" id="r1"></div></div>
+        <div class="reel"><div class="track" id="r2"></div></div>
+        <div class="reel"><div class="track" id="r3"></div></div>
+    </div>
+
+    <button id="spinBtn" onclick="startSpin()">Draw Lucky Number</button>
+</div>
+
+<div class="dialog" id="dialog">
+    <div class="dialog-box">
+        <h1 id="ln"></h1>
+        <p style="font-size:20px;">Congratulations</p><br>
+        <button onclick="closeDialog()">Spin Again</button>
+    </div>
+</div>
+
+<script>
+const HEIGHT = 110;
+const DIGITS = 10;
+const LOOPS = 25;
+
+/* ---------- Reel Setup ---------- */
+function resetReels() {
+    ["r1", "r2", "r3"].forEach(id => {
+        const track = document.getElementById(id);
+        track.style.transition = "none";
+        track.style.transform = "translateY(0)";
+        track.innerHTML = "<div>0</div>";
+    });
+}
+
+function build(track) {
+    track.innerHTML = "";
+    for (let i = 0; i < DIGITS * LOOPS; i++) {
+        const d = document.createElement("div");
+        d.innerText = i % 10;
+        track.appendChild(d);
+    }
+}
+
+function spin(trackId, duration, finalDigit, direction) {
+    const track = document.getElementById(trackId);
+    build(track);
+
+    const rounds = Math.floor(Math.random() * 6) + 10;
+    const index = rounds * DIGITS + finalDigit;
+    const offset = index * HEIGHT;
+
+    track.style.transition = "none";
+
+    if (direction === "down") {
+        // START ABOVE, MOVE DOWN
+        track.style.transform = `translateY(-${offset}px)`;
+    } else {
+        // START AT ZERO, MOVE UP
+        track.style.transform = "translateY(0)";
+    }
+
+    track.offsetHeight; // force reflow
+
+    track.style.transition =
+        `transform ${duration}ms cubic-bezier(0.15, 0.85, 0.25, 1)`;
+
+    if (direction === "down") {
+        track.style.transform = "translateY(0)";
+    } else {
+        track.style.transform = `translateY(-${offset}px)`;
+    }
+
+    setTimeout(() => {
+        track.style.transition = "none";
+
+        const finalPos =
+            direction === "down"
+                ? -(finalDigit * HEIGHT)
+                : -(finalDigit * HEIGHT);
+
+        track.style.transform = `translateY(${finalPos}px)`;
+    }, duration);
+}
+
+/* ---------- Spin Logic ---------- */
+function startSpin() {
+    document.getElementById("spinBtn").disabled = true;
+
+    // 🔧 CHANGE RANGE HERE IF NEEDED
+    // const lucky = Math.floor(Math.random() * 101) + 100; // 100–200
+    // const lucky = Math.floor(Math.random() * 200) + 1;   // 1–200
+    const lucky = Math.floor(Math.random() * 201);          // 0–200
+
+    const padded = lucky.toString().padStart(3, "0");
+
+    const forcedFirst = [0,1,2][Math.floor(Math.random() * 3)];
+    const d2 = parseInt(padded[1]);
+    const d3 = parseInt(padded[2]);
+
+    spin("r1", 5000, forcedFirst,"down");
+    spin("r2", 8000, d2,'up');
+    spin("r3", 12000, d3,'down');
+
+    setTimeout(() => {
+        document.getElementById("ln").innerText =
+            `Lucky Number: ${forcedFirst}${d2}${d3}`;
+        document.getElementById("dialog").style.display = "flex";
+        launchCelebration();
+        document.getElementById("spinBtn").disabled = false;
+    }, 14000);
+}
+
+function closeDialog() {
+    document.getElementById("dialog").style.display = "none";
+    resetReels();
+}
+
+/* ---------- Confetti ---------- */
+function launchCelebration() {
+    const colors = [
+        "#d4af37", "#c9a227", "#203a43",
+        "#0f2027", "#f2d27c", "#ffffff"
+    ];
+
+    const confettiCount = 150;
+
+    for (let i = 0; i < confettiCount; i++) {
+        createPaperConfetti("left", colors);
+        createPaperConfetti("right", colors);
+    }
+}
+
+function createPaperConfetti(side, colors) {
+    const confetti = document.createElement("div");
+    confetti.className = "confetti-strip";
+    confetti.style.backgroundColor =
+        colors[Math.floor(Math.random() * colors.length)];
+
+    let x = side === "left"
+        ? Math.random() * 80
+        : window.innerWidth - Math.random() * 80;
+
+    let y = window.innerHeight;
+
+    let vx = side === "left"
+        ? Math.random() * 3 + 2
+        : -(Math.random() * 3 + 2);
+
+    let vy = -(Math.random() * 12 + 18);
+    let gravity = 0.5;
+
+    let rotation = Math.random() * 360;
+    let rotationSpeed = Math.random() * 8 - 4;
+
+    confetti.style.left = x + "px";
+    confetti.style.top = y + "px";
+
+    document.body.appendChild(confetti);
+
+    function animate() {
+        vy += gravity;
+        x += vx;
+        y += vy;
+        rotation += rotationSpeed;
+
+        confetti.style.left = x + "px";
+        confetti.style.top = y + "px";
+        confetti.style.transform = `rotate(${rotation}deg)`;
+
+        if (y < window.innerHeight - 10) {
+            requestAnimationFrame(animate);
+        } else {
+            confetti.style.top = (window.innerHeight - 10) + "px";
+        }
+    }
+    animate();
+}
+
+/* Initial state */
+resetReels();
+</script>
+
+</body>
+</html>
