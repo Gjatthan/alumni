@@ -220,9 +220,9 @@ function startSpin() {
     const d2 = parseInt(padded[1]);
     const d3 = parseInt(padded[2]);
 
-    spin("r1", 5000, forcedFirst,"down");
+    spin("r1", 5000, forcedFirst,"up");
     spin("r2", 8000, d2,'up');
-    spin("r3", 12000, d3,'down');
+    spin("r3", 12000, d3,'up');
 
     setTimeout(() => {
         document.getElementById("ln").innerText =
