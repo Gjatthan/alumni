@@ -236,7 +236,7 @@ function spin(trackId, duration, finalDigit, direction) {
     document.getElementById("spinBtn").disabled = true;
 
     // STRICT RANGE: 1–200
-    const lucky = Math.floor(Math.random() * 10) + 1;
+    const lucky = Math.floor(Math.random() * 198) + 1;
 
     // Convert to 3-digit string (001–200)
     const padded = lucky.toString().padStart(3, "0");
