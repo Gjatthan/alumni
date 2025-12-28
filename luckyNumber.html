@@ -206,7 +206,7 @@ function spin(trackId, duration, finalDigit, direction) {
 }
 
 /* ---------- Spin Logic ---------- */
-function startSpin() {
+/*function startSpin() {
     document.getElementById("spinBtn").disabled = true;
 
     // 🔧 CHANGE RANGE HERE IF NEEDED
@@ -231,7 +231,33 @@ function startSpin() {
         launchCelebration();
         document.getElementById("spinBtn").disabled = false;
     }, 14000);
+}*/
+    function startSpin() {
+    document.getElementById("spinBtn").disabled = true;
+
+    // ✅ STRICT RANGE: 1–200
+    const lucky = Math.floor(Math.random() * 196) + 1;
+
+    // Convert to 3-digit string (001–200)
+    const padded = lucky.toString().padStart(3, "0");
+
+    const d1 = parseInt(padded[0]);
+    const d2 = parseInt(padded[1]);
+    const d3 = parseInt(padded[2]);
+
+    spin("r1", 5000, d1, "up");
+    spin("r2", 8000, d2, "up");
+    spin("r3", 12000, d3, "up");
+
+    setTimeout(() => {
+        document.getElementById("ln").innerText =
+            `Lucky Number: ${lucky}`;
+        document.getElementById("dialog").style.display = "flex";
+        launchCelebration();
+        document.getElementById("spinBtn").disabled = false;
+    }, 14000);
 }
+
 
 function closeDialog() {
     document.getElementById("dialog").style.display = "none";
